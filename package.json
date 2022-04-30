@@ -37,7 +37,8 @@
     "inflection": "^1.13.2",
     "mdast-util-from-markdown": "^1.2.0",
     "mdast-util-frontmatter": "^1.0.0",
-    "squirrelly": "^8.0.8",
+    "micromark-extension-frontmatter": "^1.0.0",
+    "template-templates": "^0.0.12",
     "toml": "^3.0.0",
     "yaml": "^2.0.1"
   }

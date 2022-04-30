@@ -5,7 +5,7 @@
       "conversation": [
         {
           "who": "konsumer",
-          "text": "Hi, yer name is {player.name}, right?"
+          "text": "Hi, yer name is ${player.name}, right?"
         }
       ],
       "options": [
@@ -36,7 +36,7 @@
           "text": "My name is konsumer. I think we'll be great friends."
         },
         {
-          "who": "{player.name}",
+          "who": "${player.name}",
           "text": "Yeah?"
         },
         {
@@ -44,7 +44,7 @@
           "text": "Say, I've got a proposition for you."
         },
         {
-          "who": "{player.name}",
+          "who": "${player.name}",
           "text": "Yeh?"
         },
         {

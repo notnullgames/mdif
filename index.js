@@ -1,9 +1,23 @@
 import { fromMarkdown } from 'mdast-util-from-markdown'
-import inflection from 'inflection'
 import { frontmatter } from 'micromark-extension-frontmatter'
 import { frontmatterFromMarkdown } from 'mdast-util-frontmatter'
+import YAML from 'yaml'
+import TOML from 'toml'
+import tpl from 'template-templates'
 
-export async function parse (content, variables = {}) {
+// run a single conversation in the dialog
+// TODO: actually implement this
+export function run (dialog, variables) {
+  let currentDialog
+  return {
+    get (name) {
+      currentDialog = dialog.dialogs.find(d => d.id === name)
+    }
+  }
+}
+
+// parse a markdown file into dialog format
+export function parse (content) {
   const ast = fromMarkdown(content, {
     extensions: [frontmatter(['yaml'])],
     mdastExtensions: [frontmatterFromMarkdown(['yaml', 'toml'])]
@@ -14,10 +28,8 @@ export async function parse (content, variables = {}) {
   let info = ast.children.find(c => c.type === 'yaml' || c.type === 'toml')
   if (info) {
     if (info.type === 'yaml') {
-      const YAML = await import('yaml')
       info = YAML.parse(info.value)
     } else {
-      const TOML = await import('toml')
       info = TOML.parse(info.value)
     }
   } else {
@@ -29,7 +41,7 @@ export async function parse (content, variables = {}) {
   for (let t = 0; t < ast.children.length; t++) {
     const tag = ast.children[t]
     if (tag.type === 'heading' && tag.depth === 2) {
-      const id = inflection.dasherize((tag.children.find(tt => tt.type === 'text').value.trim())).toLowerCase().replace(/-/g, '_').replace(/'/g, '')
+      const id = tag.children.find(tt => tt.type === 'text').value.trim().toLowerCase().replace(/[- .,\\/]/g, '_').replace(/['"?*%$"]/g, '')
       const dialog = {
         id,
         conversation: [],

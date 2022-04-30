@@ -7,7 +7,7 @@ Object {
       "code": Array [],
       "conversation": Array [
         Object {
-          "text": "Hi, yer name is {player.name}, right?",
+          "text": "Hi, yer name is \${player.name}, right?",
           "who": "konsumer",
         },
       ],
@@ -40,7 +40,7 @@ Object {
         },
         Object {
           "text": "Yeah?",
-          "who": "{player.name}",
+          "who": "\${player.name}",
         },
         Object {
           "text": "Say, I've got a proposition for you.",
@@ -48,7 +48,7 @@ Object {
         },
         Object {
           "text": "Yeh?",
-          "who": "{player.name}",
+          "who": "\${player.name}",
         },
         Object {
           "text": "Yep. So, here's the deal: I will give you this sword, but you have to promise to not hit me with it. Sound good?",
