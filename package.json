@@ -1,0 +1,13 @@
+{
+  "name": "mdif",
+  "type": "module",
+  "version": "0.0.0",
+  "description": "dialog/interactive fiction engine that let's you use markdown to describe conversations and games",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": ["interactive", "fiction", "dialog", "game"],
+  "author": "David Konsumer <konsumer@jetboystudio.com>",
+  "license": "MIT"
+}
