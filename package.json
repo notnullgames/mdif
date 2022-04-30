@@ -2,7 +2,7 @@
   "name": "mdif",
   "type": "module",
   "version": "0.0.0",
-  "description": "dialog/interactive fiction engine that let's you use markdown to describe conversations and games",
+  "description": "dialog/interactive fiction engine that lets you use markdown to describe conversations and games",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
