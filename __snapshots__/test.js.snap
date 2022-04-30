@@ -1,0 +1,176 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`mdif parse 1`] = `
+Object {
+  "dialogs": Array [
+    Object {
+      "code": Array [],
+      "conversation": Array [
+        Object {
+          "text": "Hi, yer name is {player.name}, right?",
+          "who": "konsumer",
+        },
+      ],
+      "id": "start",
+      "options": Array [
+        Object {
+          "link": "#start",
+          "text": "hmm?",
+        },
+        Object {
+          "link": "#thats_my_name",
+          "text": "yes",
+        },
+        Object {
+          "link": "#lie_about_name",
+          "text": "no",
+        },
+        Object {
+          "link": "#lie_about_name",
+          "text": "wait, how do you know my name?",
+        },
+      ],
+    },
+    Object {
+      "code": Array [],
+      "conversation": Array [
+        Object {
+          "text": "My name is konsumer. I think we'll be great friends.",
+          "who": "konsumer",
+        },
+        Object {
+          "text": "Yeah?",
+          "who": "{player.name}",
+        },
+        Object {
+          "text": "Say, I've got a proposition for you.",
+          "who": "konsumer",
+        },
+        Object {
+          "text": "Yeh?",
+          "who": "{player.name}",
+        },
+        Object {
+          "text": "Yep. So, here's the deal: I will give you this sword, but you have to promise to not hit me with it. Sound good?",
+          "who": "konsumer",
+        },
+      ],
+      "id": "that's _my _name",
+      "options": Array [
+        Object {
+          "link": "#thats_my_name",
+          "text": "what?",
+        },
+        Object {
+          "link": "#take_sword",
+          "text": "ok, deal.",
+        },
+        Object {
+          "link": "#no_promises",
+          "text": "no promises.",
+        },
+        Object {
+          "link": "#goodbye",
+          "text": "lemme think about it",
+        },
+      ],
+    },
+    Object {
+      "code": Array [],
+      "conversation": Array [
+        Object {
+          "text": "Well, that's freaky. Ok, are you sure?",
+          "who": "konsumer",
+        },
+      ],
+      "id": "no _promises",
+      "options": Array [
+        Object {
+          "link": "#take_sword",
+          "text": "I was just joking. I won't hit you with it",
+        },
+        Object {
+          "link": "#scare_konsumer",
+          "text": "I will definitely hit you with that sword.",
+        },
+      ],
+    },
+    Object {
+      "code": Array [
+        Object {
+          "langauge": "js",
+          "source": "konsumer.scared = true",
+        },
+      ],
+      "conversation": Array [
+        Object {
+          "text": "Ok, color me scared. I will avoid you in the future.",
+          "who": "konsumer",
+        },
+      ],
+      "id": "scare _konsumer",
+      "options": Array [],
+    },
+    Object {
+      "code": Array [],
+      "conversation": Array [
+        Object {
+          "text": "Tom said that was your name. Did he lie?",
+          "who": "konsumer",
+        },
+      ],
+      "id": "lie _about _name",
+      "options": Array [
+        Object {
+          "link": "#lie_about_name",
+          "text": "what?",
+        },
+        Object {
+          "link": "#goodbye",
+          "text": "yes",
+        },
+        Object {
+          "link": "#thats_my_name",
+          "text": "no",
+        },
+      ],
+    },
+    Object {
+      "code": Array [
+        Object {
+          "langauge": "js",
+          "source": "player.inventory.push('konsumer_sword')",
+        },
+      ],
+      "conversation": Array [
+        Object {
+          "text": "Ok, here ya go. Now remember: Don't hit me with it.",
+          "who": "konsumer",
+        },
+      ],
+      "id": "take sword",
+      "options": Array [],
+    },
+    Object {
+      "code": Array [],
+      "conversation": Array [
+        Object {
+          "text": "ok, see ya!",
+          "who": "konsumer",
+        },
+      ],
+      "id": "goodbye",
+      "options": Array [
+        Object {
+          "link": "END",
+          "text": "byeeee!",
+        },
+      ],
+    },
+  ],
+  "info": Object {
+    "map": "nanrnia",
+    "name": "Narnia",
+  },
+}
+`;
