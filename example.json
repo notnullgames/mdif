@@ -29,7 +29,7 @@
       "code": []
     },
     {
-      "id": "that's _my _name",
+      "id": "thats_my_name",
       "conversation": [
         {
           "who": "konsumer",
@@ -73,7 +73,7 @@
       "code": []
     },
     {
-      "id": "no _promises",
+      "id": "no_promises",
       "conversation": [
         {
           "who": "konsumer",
@@ -93,7 +93,7 @@
       "code": []
     },
     {
-      "id": "scare _konsumer",
+      "id": "scare_konsumer",
       "conversation": [
         {
           "who": "konsumer",
@@ -109,7 +109,7 @@
       ]
     },
     {
-      "id": "lie _about _name",
+      "id": "lie_about_name",
       "conversation": [
         {
           "who": "konsumer",
@@ -133,7 +133,7 @@
       "code": []
     },
     {
-      "id": "take sword",
+      "id": "take_sword",
       "conversation": [
         {
           "who": "konsumer",

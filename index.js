@@ -29,7 +29,7 @@ export async function parse (content, variables = {}) {
   for (let t = 0; t < ast.children.length; t++) {
     const tag = ast.children[t]
     if (tag.type === 'heading' && tag.depth === 2) {
-      const id = inflection.underscore(tag.children.find(tt => tt.type === 'text').value.trim())
+      const id = inflection.dasherize((tag.children.find(tt => tt.type === 'text').value.trim())).toLowerCase().replace(/-/g, '_').replace(/'/g, '')
       const dialog = {
         id,
         conversation: [],

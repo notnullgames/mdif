@@ -55,7 +55,7 @@ Object {
           "who": "konsumer",
         },
       ],
-      "id": "that's _my _name",
+      "id": "thats_my_name",
       "options": Array [
         Object {
           "link": "#thats_my_name",
@@ -83,7 +83,7 @@ Object {
           "who": "konsumer",
         },
       ],
-      "id": "no _promises",
+      "id": "no_promises",
       "options": Array [
         Object {
           "link": "#take_sword",
@@ -108,7 +108,7 @@ Object {
           "who": "konsumer",
         },
       ],
-      "id": "scare _konsumer",
+      "id": "scare_konsumer",
       "options": Array [],
     },
     Object {
@@ -119,7 +119,7 @@ Object {
           "who": "konsumer",
         },
       ],
-      "id": "lie _about _name",
+      "id": "lie_about_name",
       "options": Array [
         Object {
           "link": "#lie_about_name",
@@ -148,7 +148,7 @@ Object {
           "who": "konsumer",
         },
       ],
-      "id": "take sword",
+      "id": "take_sword",
       "options": Array [],
     },
     Object {
