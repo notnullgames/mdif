@@ -43,5 +43,8 @@
     "mustache": "^4.2.0",
     "toml": "^3.0.0",
     "yaml": "^2.0.1"
+  },
+  "devDependencies": {
+    "chalk": "^5.0.1"
   }
 }

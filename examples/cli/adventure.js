@@ -1,98 +1,114 @@
 // this is a simple demo of a CLI interactive fixtion, using example.md
+// You can edit example.md to make a new game!
 
 import { promises as fs } from 'node:fs'
-import { runDialog } from '../../index.js' // 'mdif'
+import chalk from 'chalk'
+import { runDialog, getASTInfo} from '../../index.js' // 'mdif'
 
 // function sleep for ms
-const sleep = time => new Promsie(resolve=> setTimeout(resolve, time))
+const sleep = time => new Promise(resolve=> setTimeout(resolve, time))
 
 // read a markdown file as a string
 const md = (await fs.readFile('example.md')).toString()
+const { info } = getASTInfo(md)
 
-// tell the user how to play
-console.log('Press space to advance through a conversation, or a number to choose something.')
-
-/*
-
-// setup stdin for input
 process.stdin.setRawMode( true )
 process.stdin.resume()
 process.stdin.setEncoding('utf8')
 
-// put last input into currentKey
+// put last input into currentKey, exit on Q
 let currentKey
-stdin.on('data', key => {
+process.stdin.on('data', key => {
+  if (key === 'q') {
+    process.exit(0)
+  }
+  if (key === 'd') {
+    describe()
+  }
   currentKey = key
 })
 
 // setup some intiial state
 const state = {
-  player: { name: 'Simon' },
+  player: { name: 'Simon', inventory: [] },
   konsumer: { scared: false }
 }
 
-// this will give you the current dialog object or an array of choices
-let screen = runDialog (md, 'start', state)
+// each person has a color
+const peopleColors = {}
+peopleColors[state.player.name] = chalk.green
+peopleColors.konsumer = chalk.yellow
 
-// tells mdif which conversation-line in current dialog to show
-let dialogPosition = 0
-
-// runDialog returns "END" when it is time to leave the conversation
-while(screen !== 'END'){
-  currentKey = ''
-  if (Array.isArray(screen)) {
-    // display choices, wait for number
-    console.log(screen.map((t, i) => `  ${i + 1}.) ${t.label}`).join('\n'))
-    
-    // wait for a key
-    while(currentKey === ''){
-      await sleep(100)
-    }
-    
-    // check input & get next screen
-    const choice = screen[currentKey]?.id
-    if (choice) {
-      if (choice === 'END') {
-        break
-      }
-      // reset dialog-position
-      dialogPosition = 0
-      
-      // get next screen
-      screen = runDialog (md, choice, state})
-    } else {
-      console.log('Invalid choice.')
-    }
-  } else {
-    // if there is code, run it on the current state
-    if (screen?.code?.length) {
-      const code = screen.code.filter(c => c.lang === 'js').map(c => c.source).join('\n')
-      const f = new Function(...Object.keys(stata), code)
-      f(...Object.values(state))
-    }
-
-    const line = screen?.conversation[dialogPosition]
-
-    // check line, if they are outside the bounds, just stop (they didn't make a choice at the end, so maybe there was no choice in last dialog.)
-    if (!line) {
-      break
-    }
-
-    // show the text of current line
-    if (line.name) {
-      console.log(`${line.name}:`)
-    }
-    console.log(line.text)
-
-    // wait for a space
-    while(currentKey !== ' '){
-      await sleep(100)
-    } 
-
-    dialogPosition++
-  }
+// tell the player about the world
+const describe = () => {
+  process.stdout.write(`
+${chalk.bold(chalk.underline(info.name))}
+${info.description}
+`)
 }
 
-console.log('Thanks for playing.')
+// tell the player how to play
+process.stdout.write(`
+${chalk.bold('Press space to advance through a conversation, or a number to choose something. Press Q to quit. Press D to describe the palce you are in.')}
+Let's begin.`)
 
-*/
+let currentDialog = 'start'
+let screen = runDialog (md, currentDialog, state)
+// track the current position in dialog
+let dialogPosition = 1
+let lastPrompt = 'start'
+
+// say a sinlge line of dialog, wait for space
+async function say(line) {
+  if (line.who) {
+    process.stdout.write('\n' + chalk.bold(peopleColors[line.who](line.who)) + ': ')
+  }
+  process.stdout.write(line.text + '\n')
+
+  // wait for a space
+  while(currentKey !== ' '){
+    await sleep(100)
+  } 
+}
+
+// show options, wait for menu input
+async function menu(options) {
+  if (!options.length) {
+    return { dialog: 'END' }
+  }
+  let menu = '\n'
+  for (const i in options) {
+    menu += `  ${1 + parseInt(i)}.) ${options[i].text}\n`
+  }
+  process.stdout.write(menu + '\n? ')
+  // wait for a valid option
+  while(isNaN(currentKey) || currentKey < 1 || currentKey > options.length){
+    await sleep(100)
+  }
+  const choice = options[currentKey-1]
+  process.stdout.write(choice.text + '\n')
+  return choice
+}
+
+async function runScreen() {
+  if (Array.isArray(screen)) {
+    currentKey = ''
+    const choice = await menu(screen)
+    if (choice.dialog === 'END') {
+      return false
+    }
+    currentDialog = choice.dialog.replace(/^#/, '')
+    dialogPosition = 0
+  } else {
+    currentKey = ''
+    await say(screen)
+    dialogPosition++
+  }
+  screen = runDialog (md, currentDialog, state, dialogPosition)
+  return true
+}
+
+describe()
+while(await runScreen()) {}
+console.log('\nThanks for playing.\n')
+process.exit()
