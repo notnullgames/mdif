@@ -1,7 +1,7 @@
 {
   "name": "mdif",
   "type": "module",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "dialog/interactive fiction engine that lets you use markdown to describe conversations and games",
   "source": "index.js",
   "scripts": {
