@@ -11,7 +11,7 @@ In your own project:
 npm i mdif
 ```
 
-```sh
+```js
 import { promises as fs } from 'node:fs'
 import { runDialog } from 'mdif'
 
