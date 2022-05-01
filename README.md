@@ -117,6 +117,6 @@ name = 'My Cool World'
 
 ### mustache
 
-Go read  [the docs](http://mustache.github.io/mustache.5.html) for more about how to use it, but essentially mustache is parsed before the dialog section is run, so you can insert logic based on your variables, like substitution loops, condtionals, etc.
+Go read  [the docs](http://mustache.github.io/mustache.5.html) for more about how to use it, but essentially mustache is parsed before the dialog section is run, so you can insert logic based on your variables, like substitution, loops, condtionals, etc.
 
 
