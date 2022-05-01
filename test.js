@@ -57,12 +57,15 @@ describe('mdif', () => {
     test('get a single section AST, by ID', () => {
       const section = getSection(md, 'start')
       expect(section.id).toBe('start')
-      expect(section.children.length).toBe(4)
+      expect(section.children.length).toBe(7)
       expect(section.children.map(c => c.type)).toEqual([
+        "paragraph",
+        "paragraph",
         "paragraph",
         "paragraph",
         "blockquote",
         "list",
+        "paragraph",
       ])
     })
 
