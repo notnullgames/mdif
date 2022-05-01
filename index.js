@@ -152,5 +152,15 @@ export const runDialog = (md, id, variables, position = 0) => {
     return dialog.options
   }
 
+  line.ending = 'more'
+
+  if (position === (dialog.conversation.length - 1)) {
+    if (dialog.options.length) {
+      line.ending = 'prompt'
+    } else {
+      line.ending = 'end'
+    }
+  }
+
   return line
 }

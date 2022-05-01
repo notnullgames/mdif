@@ -42,6 +42,7 @@ peopleColors.konsumer = chalk.yellow
 // tell the player about the world
 const describe = () => {
   process.stdout.write(`
+
 ${chalk.bold(chalk.underline(info.name))}
 ${info.description}
 `)
@@ -64,6 +65,10 @@ async function say(line) {
     process.stdout.write('\n' + chalk.bold(peopleColors[line.who](line.who)) + ': ')
   }
   process.stdout.write(line.text + '\n')
+
+  if (line.ending === 'prompt' || line.ending === 'end') {
+    return
+  }
 
   // wait for a space
   while(currentKey !== ' '){
