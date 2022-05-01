@@ -39,19 +39,14 @@ const peopleColors = {}
 peopleColors[state.player.name] = chalk.green
 peopleColors.konsumer = chalk.yellow
 
-// tell the player about the world
-const describe = () => {
-  process.stdout.write(`
+// tell the player how to play
+process.stdout.write(`
+${chalk.bold('Press space to advance through a conversation, or a number to choose something. Press Q to quit. Press D to describe the palce you are in.')}
+Let's begin.
 
 ${chalk.bold(chalk.underline(info.name))}
 ${info.description}
 `)
-}
-
-// tell the player how to play
-process.stdout.write(`
-${chalk.bold('Press space to advance through a conversation, or a number to choose something. Press Q to quit. Press D to describe the palce you are in.')}
-Let's begin.`)
 
 let currentDialog = 'start'
 let screen = runDialog (md, currentDialog, state)
@@ -69,6 +64,8 @@ async function say(line) {
   if (line.ending === 'prompt' || line.ending === 'end') {
     return
   }
+
+  process.stdout.write('\x1b[999G\x1b[2D->')
 
   // wait for a space
   while(currentKey !== ' '){
@@ -113,7 +110,6 @@ async function runScreen() {
   return true
 }
 
-describe()
 while(await runScreen()) {}
 console.log('\nThanks for playing.\n')
 process.exit()
