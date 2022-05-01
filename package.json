@@ -34,11 +34,12 @@
     "dist/mdif.umd.js.map"
   ],
   "dependencies": {
-    "inflection": "^1.13.2",
+    "did-you-mean": "^0.0.1",
     "mdast-util-from-markdown": "^1.2.0",
     "mdast-util-frontmatter": "^1.0.0",
+    "memoizee": "^0.4.15",
     "micromark-extension-frontmatter": "^1.0.0",
-    "template-templates": "^0.0.12",
+    "mustache": "^4.2.0",
     "toml": "^3.0.0",
     "yaml": "^2.0.1"
   }

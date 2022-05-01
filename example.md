@@ -1,16 +1,22 @@
 ---
 name: Narnia
-map: nanrnia
+description: A land of rolling hills rising to low mountains in the south. It is predominantly forested except for marshlands in the north. The country is bordered on the east by the Eastern Ocean, on the west by a great mountain range, on the north by the River Shribble, and on the south by Archenland.
 ---
 
 ## Start
 
-> *konsumer* Hi, yer name is ${player.name}, right?
+{{#konsumer.scared}}
+I'm not talking to you, you're going to sword me!
+{{/konsumer.scared}}
+
+{{^konsumer.scared}}
+> *konsumer* Hi, yer name is {{player.name}}, right?
 
 - [hmm?](#start)
 - [yes](#thats_my_name)
 - [no](#lie_about_name)
 - [wait, how do you know my name?](#lie_about_name)
+{{/konsumer.scared}}
 
 
 ## That's My Name
