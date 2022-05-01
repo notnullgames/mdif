@@ -15,7 +15,7 @@ npm i mdif
 import { promises as fs } from 'node:fs'
 import { runDialog } from 'mdif'
 
-const md = (await fs.readFile('example.md')).toString()
+const md = (await fs.readFile('example.md'))
 
 // get the first line of dialog from "start"
 const variables = {
