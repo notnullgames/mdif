@@ -42,7 +42,8 @@ cd mdif
 
 npm i          # install deps & tools
 
-npm start      # run examples/cli demo
+npm start      # run examples/react demo
+npm run cli    # run examples/cli demo
 npm run raylib # run examples/raylib demo
 npm test       # run unit-tests in test.js, that also have some usage info
 ```
