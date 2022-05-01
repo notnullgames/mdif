@@ -105,7 +105,7 @@ describe('mdif', () => {
       screen = runDialog(md, 'start', variables, 1)
       expect(Array.isArray(screen)).toBe(true)
       expect(screen.length).toBe(4)
-      expect(screen[0].dialog).toBe('start')
+      expect(screen[0].dialog).toBe('#start')
     })
 
     test('konsumer is scared', () => {
