@@ -68,6 +68,7 @@ The URLs should be `#id` (to link to other dialogs) or `file#id` (to load a diff
 
 let md = await fs.readFile('example.md')
 
+// user has progressed to page 1, which in this case has a menu (it's an id not in conversation lines)
 let dialog = runDialog(md, 'start', variables, 1) 
 
 // is this a menu or a line of text
