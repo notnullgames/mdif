@@ -34,8 +34,11 @@ console.log(screen)
 ## try it out here
 
 ```sh
+git clone https://github.com/konsumer/mdif.git
+cd mdif
 npm i      # install deps & tools
+
 npm start  # run examples/cli demo
-npm test   # run unit-tests in test.js, that also have soem usage info
+npm test   # run unit-tests in test.js, that also have some usage info
 ```
 
