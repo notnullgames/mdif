@@ -1,46 +1,65 @@
 import { useEffect, useState } from 'react'
-import { runDialog, getASTInfo } from '../../../index.js' // 'mdif'
+import { runDialog } from '../../../index.js' // 'mdif'
 
-export default function MdIF ({ md, dialog, state = {} }) {
-  const [currentDialog, setDialog] = useState(dialog)
+export default function MdIF ({ md, dialog, variables = {} }) {
   const [line, setLine] = useState({})
-  const [options, setOptions] = useState([])
-  const [dialogPosition, setdialogPosition] = useState(0)
+  const [options, setoptions] = useState([])
+  const [position, setPosition] = useState(0)
 
   useEffect(() => {
-    linkHandler(dialog)({ preventDefault: () => {} })
-  }, [md, dialog])
+    openDialog(dialog)()
+  }, [md, dialog, position])
 
-  const linkHandler = d => e => {
-    e.preventDefault()
-    const screen = runDialog(md, d, state, dialogPosition)
+  const openDialog = d => e => {
+    if (e?.preventDefault) {
+      e.preventDefault()
+    }
+    const screen = runDialog(md, d.replace(/^#/, ''), variables, position)
     if (Array.isArray(screen)) {
       setLine({})
-      setOptions(screen)
+      setoptions(screen)
     } else {
-      setDialog(d)
-      setLine(screen)
       if (screen.ending === 'prompt') {
-        setOptions(runDialog(md, d, state, dialogPosition + 1))
+        setoptions(runDialog(md, d.replace(/^#/, ''), variables, position + 1))
       } else {
-        setOptions([])
+        setoptions([])
       }
+      setLine(screen)
     }
   }
 
+  const incrementPosition = () => {
+    setPosition(position + 1)
+    openDialog(dialog)
+  }
+
   return (
-    <>
-      <pre>
-        {JSON.stringify(line, null, 2)}
-      </pre>
-      <ul>
-        {options.map((o, i) => (
-          <li key={i}><a onClick={linkHandler(o.dialog.replace(/^#/, ''))} href={o.dialog}>{o.text}</a></li>
-        ))}
-      </ul>
-      {line.ending === 'more' && (
-        <button onClick={() => setdialogPosition(dialogPosition + 1)}>more</button>
+    <div className='dialog'>
+      {line.who && (
+        <>
+          <div className='who'>
+            {line.who}
+          </div>
+          <img src={`/assets/images/${line.who}.png`} alt='' className='whoImage' />
+        </>
       )}
-    </>
+      {line.text && (
+        <div className='text'>
+          {line.text}
+        </div>
+      )}
+      {options && !!options.length && (
+        <ul className='options'>
+          {options.map((o, i) => (
+            <li key={i}>
+              <a href={o.dialog} onClick={openDialog(o.dialog)}>
+                {o.text}
+              </a>
+            </li>
+          ))}
+        </ul>
+      )}
+      <div className={`prompt ${line?.ending}`} />
+    </div>
   )
 }
