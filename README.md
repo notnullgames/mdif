@@ -52,7 +52,7 @@ Essentially, you can use [mustache](http://mustache.github.io/mustache.5.html) f
 ### markdown
 
 - An h2 (`##`) defines a new dialog.
-- a blockquote (`>`) defines something someone is saying. Optionally, wrap "who" in italic (`*Feindish Guy* Oh hey, my fellow feind`)
+- a blockquote (`>`) defines something someone is saying. Optionally, wrap "who" in italic: `*Feindish Guy* Oh hey, my fellow feind`
 - a list of links is options available at the end. It looks like this:
 
 ```md
