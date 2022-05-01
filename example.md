@@ -34,7 +34,9 @@ I'm not talking to you, you're going to sword me!
 
 > *{{player.name}}* Yeh?
 
-> *konsumer* Yep. So, here's the deal: I will give you this sword, but you have to promise to not hit me with it. Sound good?
+> *konsumer* Yep. So, here's the deal: I will give you this sword, but you have to promise to not hit me with it.
+
+> *konsumer* Sound good?
 
 - [what?](#thats_my_name)
 - [ok, deal.](#take_sword)
@@ -44,7 +46,9 @@ I'm not talking to you, you're going to sword me!
 
 ## No Promises
 
-> *konsumer* Well, that's freaky. Ok, are you sure?
+> *konsumer* Well, that's freaky.
+
+> *konsumer* Ok, are you sure?
 
 
 - [I was just joking. I won't hit you with it](#take_sword)

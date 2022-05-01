@@ -1,9 +1,9 @@
-// this is a simple demo of a CLI interactive fixtion, using example.md
+// this is a simple demo of a CLI interactive fiction, using example.md
 // You can edit example.md to make a new game!
 
 import { promises as fs } from 'node:fs'
 import chalk from 'chalk'
-import { runDialog, getASTInfo} from '../../index.js' // 'mdif'
+import { runDialog, getASTInfo} from '../index.js' // 'mdif'
 
 // function sleep for ms
 const sleep = time => new Promise(resolve=> setTimeout(resolve, time))
