@@ -88,7 +88,7 @@ describe('mdif', () => {
   })
 
   // this illustrates more typical usage
-  describe.skip('usage', () => {
+  describe('usage', () => {
     test('konsumer is not scared', () => {
       const variables = {
         player: { name: 'Peter' },
@@ -97,11 +97,15 @@ describe('mdif', () => {
     
       // get the first screen
       let screen = runDialog(md, 'start', variables)
-      console.log(screen)
+      expect(Array.isArray(screen)).toBe(false)
+      expect(screen.who).toBe('konsumer')
+      expect(screen.text).toBe('Hi, yer name is Peter, right?')
 
       // simulate user pressing "next" button: return options
       screen = runDialog(md, 'start', variables, 1)
-      console.log(screen)
+      expect(Array.isArray(screen)).toBe(true)
+      expect(screen.length).toBe(4)
+      expect(screen[0].dialog).toBe('start')
     })
 
     test('konsumer is scared', () => {
@@ -111,12 +115,23 @@ describe('mdif', () => {
       }
     
       // get the first screen
-      let screen = runDialog(md, 'start', variables)
-      console.log(screen)
+      const screen = runDialog(md, 'start', variables)
+      expect(Array.isArray(screen)).toBe(true)
+      expect(screen.length).toBe(0)
+    })
 
-      // simulate user pressing "next" button: END
-      screen = runDialog(md, 'start', variables, 1)
-      console.log(screen)
+    test('run code', () => {
+      const variables = {
+        player: { name: 'Peter' },
+        konsumer: { scared: false }
+      }
+    
+      // get the first screen
+      const screen = runDialog(md, 'scare_konsumer', variables)
+      expect(Array.isArray(screen)).toBe(false)
+      expect(variables.konsumer.scared).toBe(true)
+      expect(screen.who).toBe('konsumer')
+      expect(screen.text).toBe('Ok, color me scared. I will avoid you in the future.')
     })
   })
 })

@@ -28,11 +28,11 @@ I'm not talking to you, you're going to sword me!
 
 > *konsumer* My name is konsumer. I think we'll be great friends.
 
-> *${player.name}* Yeah?
+> *{{player.name}}* Yeah?
 
 > *konsumer* Say, I've got a proposition for you.
 
-> *${player.name}* Yeh?
+> *{{player.name}}* Yeh?
 
 > *konsumer* Yep. So, here's the deal: I will give you this sword, but you have to promise to not hit me with it. Sound good?
 

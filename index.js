@@ -122,7 +122,7 @@ export const getDialog = m((md, id, variables) => {
       if (tag.type === 'list') {
         dialog.options = tag.children.map(o => {
           return {
-            link: o.children[0].children[0].url,
+            dialog: o.children[0].children[0].url.replace(/^#/, ''),
             text: o.children[0].children[0].children[0].value
           }
         })
@@ -133,7 +133,24 @@ export const getDialog = m((md, id, variables) => {
 })
 
 // get the current part of the dialog
-export const runDialog = m((md, id, variables, position = 0) => {
-  const dialog = getDialog(md, id, variables)
-  console.log(dialog)
-})
+export const runDialog = (md, id, variables, position = 0) => {
+  // support using dialog for 1st param, instead of markdown
+  const dialog = (typeof md === 'string' || md.toString) ? getDialog(md, id, variables) : md
+
+  // run code for this dialog, when it first loads
+  if (position === 0) {
+    const code = (dialog.code || []).filter(c => c.lang === 'js').map(c => c.source).join('\n')
+    if (code) {
+      const f = new Function(...Object.keys(variables), code)
+      f(...Object.values(variables))
+    }
+  }
+
+  const line = dialog.conversation[position]
+
+  if (typeof line === 'undefined') {
+    return dialog.options
+  }
+
+  return line
+}
