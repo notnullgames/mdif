@@ -51,8 +51,8 @@ I'm not talking to you, you're going to sword me!
 > *konsumer* Ok, are you sure?
 
 
-- [I was just joking. I won't hit you with it](#take_sword)
-- [I will definitely hit you with that sword.](#scare_konsumer)
+- [I was just joking.](#take_sword)
+- [I'm serious.](#scare_konsumer)
 
 
 ## Scare Konsumer
@@ -68,7 +68,9 @@ konsumer.scared = true
 
 ## Lie About Name
 
-> *konsumer* Tom said that was your name. Did he lie?
+> *konsumer* Tom said that was your name.
+
+> *konsumer* Did he lie?
 
 - [what?](#lie_about_name)
 - [yes](#goodbye)

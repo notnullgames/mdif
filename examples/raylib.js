@@ -96,12 +96,14 @@ let screen = runDialog (md, currentDialog, state)
 let dialogPosition = 0
 let currentOption = 0
 
-const text = 'Alcohol free-market papier-mache fetishism rain tower modem chrome crypto-network sub-orbital realism drugs.'
 while (!r.WindowShouldClose()) {
   r.BeginDrawing()
   r.ClearBackground(r.LIGHTGRAY)
   if (Array.isArray(screen)) {
-
+    if (!screen.length) {
+      break
+    }
+    drawOptions(screen, { position, currentOption, fontSize })
   } else {
     drawDialog(screen.text, { texture, patch, position, fontSize, who: screen.who, whoImage: people[screen.who], more: screen.ending !== 'prompt' })
     if (screen.ending === 'prompt') {
@@ -118,6 +120,7 @@ while (!r.WindowShouldClose()) {
           break
         }
         currentOption = 0
+        dialogPosition = 0
         screen = runDialog (md, currentDialog, state)
       }
       if (currentOption < 0) {
