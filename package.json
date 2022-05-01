@@ -6,7 +6,8 @@
   "source": "index.js",
   "scripts": {
     "test": "NODE_OPTIONS='--experimental-vm-modules --no-warnings' npx -y jest --verbose=true",
-    "build": "npx -y microbundle"
+    "build": "npx -y microbundle",
+    "start": "node examples/cli/adventure.js"
   },
   "exports": {
     "require": "./dist/mdif.cjs",
