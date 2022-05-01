@@ -1,7 +1,6 @@
 # Markdown Interactive Fiction
 
-This is a dialog/interactive fiction engine (for nodejs) that lets you describe conversations and games. It uses a subset of [markdown](https://www.markdownguide.org/basic-syntax/) to define your dialogs, and [mustache](http://mustache.github.io/mustache.5.html) to express light logic/formatting. It can be used in any sort of game that has dialog with (or without) logic. It was originally made for a retro-style 2D RPG (like FF/zelda/etc) but could be used in any kind of game, or even non-games. There no real docs yet, but checkout [example.md](./example.md) or [the unit-test](./test.js) for how to use it.
-
+This is a dialog/interactive fiction engine (for nodejs) that lets you describe conversations and games. It uses a subset of [markdown](https://www.markdownguide.org/basic-syntax/) to define your dialogs, and [mustache](http://mustache.github.io/mustache.5.html) to express light logic/formatting. It can be used in any sort of game/app that has dialog with (or without) logic.
 
 ## example usage
 
