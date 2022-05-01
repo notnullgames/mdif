@@ -122,7 +122,7 @@ export const getDialog = m((md, id, variables) => {
       if (tag.type === 'list') {
         dialog.options = tag.children.map(o => {
           return {
-            dialog: o.children[0].children[0].url.replace(/^#/, ''),
+            dialog: o.children[0].children[0].url,
             text: o.children[0].children[0].children[0].value
           }
         })
