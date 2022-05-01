@@ -65,6 +65,9 @@ Essentially, you can use [mustache](http://mustache.github.io/mustache.5.html) f
 The URLs should be `#id` (to link to other dialogs) or `file#id` (to load a different conversation-collection.) This library doesn't manage that at all, so you will have to parse the url, in your code:
 
 ```js
+
+let md = await fs.readFile('example.md')
+
 let dialog = runDialog(md, 'start', variables, 1) 
 
 // is this a menu or a line of text
@@ -73,13 +76,17 @@ if (Array.isArray(dialog)) {
 
   const [file, hash] = dialog[SELECTION].url.split('#')
 
+  // it's another file, so set that to be the main md
   if (file) {
     md = await fs.readFile(file)
-    dialog = runDialog(md, hash, variables)
-  } else {
-    dialog = runDialog(md, hash, variables)
   }
+
+  // load next dialog
+  dialog = runDialog(md, hash, variables)
 }
+
+// do other stuff in loop, like show current dialog, allow user to progress, etc
+
 ```
 
 
