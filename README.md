@@ -1,6 +1,6 @@
 # Markdown Interactive Fiction
 
-This is a dialog/interactive fiction engine (for nodejs) that lets you describe conversations and games. It uses a subset of [markdown](https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax) to define your dialogs, and [mustache](http://mustache.github.io/mustache.5.html) to express light logic/formatting. It can be used in any sort of game/app that has dialog with (or without) logic.
+This is a dialog/interactive fiction engine (for javascript) that lets you describe conversations and games. It uses a subset of [markdown](https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax) to define your dialogs, and [mustache](http://mustache.github.io/mustache.5.html) to express light logic/formatting. It can be used in any sort of game/app that has dialog with (or without) logic.
 
 ## usage
 
@@ -11,7 +11,7 @@ npm i mdif
 ```
 
 ```js
-import { promises as fs } from 'node:fs'
+import { promises as fs } from 'fs'
 import { runDialog, getASTInfo } from 'mdif'
 
 const md = await fs.readFile('example.md')
@@ -45,7 +45,7 @@ npm i          # install deps & tools
 npm start      # run examples/react demo
 npm run cli    # run examples/cli demo
 npm run raylib # run examples/raylib demo
-npm test       # run unit-tests in test.js, that also have some usage info
+npm test       # run unit-tests in mdif.test.js, that also have some usage info
 ```
 
 ## story reference
@@ -103,7 +103,7 @@ Code is pulled out of codeblocks, like this (surround with 3 backticks, and set 
 player.happy = true
 ```
 
-It is run when the individual dialog first loads. Currently, the only supported langage is `js`, but we may support more later.
+It is run when the individual dialog first loads. Currently, the only supported language is `js`, but we may support more later.
 
 
 ## frontmatter

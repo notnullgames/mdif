@@ -82,6 +82,7 @@ konsumer.scared = true
 > *konsumer* Ok, here ya go. Now remember: Don't hit me with it.
 
 ```js
+player.inventory ||= []
 player.inventory.push('konsumer_sword')
 ```
 
