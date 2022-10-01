@@ -7,7 +7,7 @@ description: A land of rolling hills rising to low mountains in the south. It is
 
 {{#konsumer.scared}}
 
-I'm not talking to you, you're going to sword me!
+> *konsumer* I'm not talking to you, you're going to sword me!
 
 {{/konsumer.scared}}
 

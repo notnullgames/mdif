@@ -1,6 +1,5 @@
-/* global describe, test, expect */
-
-import { promises as fs } from 'node:fs'
+import { describe, test, expect } from 'vitest'
+import { promises as fs } from 'fs'
 import { textToId, getASTInfo, getConversations, getAllSections, getSection, getDialog, runDialog } from './index.js'
 
 const md = (await fs.readFile('example.md'))
@@ -60,7 +59,7 @@ describe('mdif', () => {
       expect(section.children.length).toBe(7)
       expect(section.children.map(c => c.type)).toEqual([
         "paragraph",
-        "paragraph",
+        "blockquote",
         "paragraph",
         "paragraph",
         "blockquote",
@@ -116,8 +115,8 @@ describe('mdif', () => {
     
       // get the first screen
       const screen = runDialog(md, 'start', variables)
-      expect(Array.isArray(screen)).toBe(true)
-      expect(screen.length).toBe(0)
+      expect(Array.isArray(screen)).toBe(false)
+      expect(screen.text).toBe("I'm not talking to you, you're going to sword me!")
     })
 
     test('run code', () => {
@@ -132,6 +131,7 @@ describe('mdif', () => {
       expect(variables.konsumer.scared).toBe(true)
       expect(screen.who).toBe('konsumer')
       expect(screen.text).toBe('Ok, color me scared. I will avoid you in the future.')
+      expect(screen.ending).toBe('end')
     })
   })
 })

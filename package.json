@@ -5,7 +5,7 @@
   "description": "dialog/interactive fiction engine that lets you use markdown to describe conversations and games",
   "source": "index.js",
   "scripts": {
-    "test": "NODE_OPTIONS='--experimental-vm-modules --no-warnings' npx -y jest --verbose=true",
+    "test": "vitest run --reporter verbose",
     "build": "npx -y microbundle",
     "cli": "node examples/cli.js",
     "start": "vite --config examples/react/vite.config.js",
@@ -51,6 +51,7 @@
     "raylib": "^0.9.0",
     "react": "^18.1.0",
     "react-dom": "^18.1.0",
-    "vite": "^2.9.6"
+    "vite": "^2.9.6",
+    "vitest": "^0.23.4"
   }
 }
