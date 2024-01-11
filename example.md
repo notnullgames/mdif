@@ -11,8 +11,17 @@ description: A land of rolling hills rising to low mountains in the south. It is
 
 {{/konsumer.scared}}
 
-
 {{^konsumer.scared}}
+
+{{#konsumer.gaveSword}}
+
+> *konsumer* How do you like the sword?
+
+- [it's ok](#sword_ok)
+- [it sucks](#sword_sucks)
+
+{{/konsumer.gaveSword}}
+{{^konsumer.gaveSword}}
 
 > *konsumer* Hi, yer name is {{player.name}}, right?
 
@@ -20,8 +29,17 @@ description: A land of rolling hills rising to low mountains in the south. It is
 - [yes](#thats_my_name)
 - [no](#lie_about_name)
 - [wait, how do you know my name?](#lie_about_name)
-
+{{/konsumer.gaveSword}}
 {{/konsumer.scared}}
+
+## Sword OK
+
+> *konsumer* I am glad you like it. Whelp, see ya!
+
+
+## Sword Sucks
+
+> *konsumer* Sorry to hear that. Whelp, see ya!
 
 
 ## That's My Name
@@ -84,6 +102,7 @@ konsumer.scared = true
 ```js
 player.inventory ||= []
 player.inventory.push('konsumer_sword')
+konsumer.gaveSword = true
 ```
 
 

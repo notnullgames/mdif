@@ -31,7 +31,7 @@ process.stdin.on('data', key => {
 // setup some intiial state
 const state = {
   player: { name: 'Simon', inventory: [] },
-  konsumer: { scared: false }
+  konsumer: { scared: false, gaveSword: false }
 }
 
 // each person has a color
