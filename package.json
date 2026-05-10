@@ -7,7 +7,9 @@
   "scripts": {
     "test": "node --test",
     "build": "npx -y microbundle",
-    "prePublishOnly": "npm run build"
+    "prePublishOnly": "npm run build",
+    "raylib": "node exaples/raylib.js",
+    "cli": "node exaples/cli.js"
   },
   "exports": {
     "require": "./dist/mdif.cjs",
@@ -39,6 +41,6 @@
     "markdown-ast": "^0.3.0"
   },
   "devDependencies": {
-    "raylib": "^0.14.0"
+    "raylib": "latest"
   }
 }

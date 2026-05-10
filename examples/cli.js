@@ -4,9 +4,8 @@ import { readFile } from 'node:fs/promises'
 import * as readline from 'node:readline/promises'
 import { stdin as input, stdout as output } from 'node:process'
 import createDialog from '../index.js'
-
-const source = await readFile(new URL('../example.md', import.meta.url), 'utf8')
-const dialog = createDialog(source)
+ 
+const dialog = createDialog(await readFile(new URL('../example.md', import.meta.url), 'utf8'))
 
 function formatLine({ speaker, text }) {
   return speaker ? `\x1b[1m${speaker}:\x1b[0m ${text}` : text
