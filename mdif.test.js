@@ -8,6 +8,8 @@ const source = await readFile('example.md', 'utf8')
 describe('basic operation', () => {
 	test('load', () => {
 		const d = mdif(source)
+		assert.equal("you can put whatever you want in here, and use it however you like.", d.info.description)
+
 		assert.equal(3, d.dialogs.size)
 		const hello = d.dialogs.get('hello')
 		assert.equal(1, hello.lines.length)

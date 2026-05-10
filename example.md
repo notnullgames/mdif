@@ -1,3 +1,7 @@
+---
+description: you can put whatever you want in here, and use it however you like.
+---
+
 ## Hello
 
 > _konsumer_ This is an example dialog.
