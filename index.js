@@ -1,166 +1,220 @@
-import { fromMarkdown } from 'mdast-util-from-markdown'
-import { frontmatter } from 'micromark-extension-frontmatter'
-import { frontmatterFromMarkdown } from 'mdast-util-frontmatter'
-import m from 'memoizee'
-import YAML from 'yaml'
-import TOML from 'toml'
-import mustache from 'mustache'
-import DidYouMean from 'did-you-mean'
+// Markdown-driven dialog system (mdif)
+//
+// Format (game.md):
+//   ## SectionName        <- dialog id (lowercased, spaces→-)
+//   > _Speaker_ Text      <- a line of dialog (speaker underlined in the quote)
+//   - [Label](#id)        <- menu choice that jumps to another dialog
+//   - [Label](END)        <- menu choice that closes the dialog
+//
+// Usage:
+//   import { parseDialog, DialogSystem } from './mdif.js'
+//   const dialog = new DialogSystem(await fs.readFile('game.md', 'utf8'))
+//   dialog.onChoice = (choice) => {
+//     if (choice.url === 'END') { /* close dialog */ }
+//     else dialog.open(choice.url.replace('#', ''))
+//   }
+//   dialog.open('test')
+//   // each frame, call dialog.current to get current line, dialog.advance() on confirm
 
-export const textToId = m((text) => text.trim().toLowerCase().replace(/[,&\- \\/]+/g, '_').replace(/[`()+={}[\]#@'!"|.?*%$"]+/g, ''))
+import md from 'markdown-ast'
+import fm from 'front-matter'
 
-// each of these functions memoizes, so they can grab their own data-dependencies (using md/id)
+// --- helpers ----------------------------------------------------------------
 
-// parse markdown initially to get meta, and info: frontmatter (in toml: +++ or yaml: ---)
-export const getASTInfo = m((md) => {
-  const ast = fromMarkdown(md, {
-    extensions: [frontmatter(['yaml', 'toml'])],
-    mdastExtensions: [frontmatterFromMarkdown(['yaml', 'toml'])]
-  })
+/** Extract plain text from an AST node array */
+function blockText(block = []) {
+  return block
+    .map((n) => {
+      if (n.type === 'text') return n.text
+      if (n.block) return blockText(n.block)
+      return ''
+    })
+    .join('')
+}
 
-  // get meta
-  let info = ast.children.find(c => c.type === 'yaml' || c.type === 'toml')
-  if (info) {
-    if (info.type === 'yaml') {
-      info = YAML.parse(info.value)
-    } else {
-      info = TOML.parse(info.value)
+/** Derive a dialog id from a heading string (lowercase, spaces→hyphens) */
+function headingId(text) {
+  return text.trim().toLowerCase().replace(/\s+/g, '-')
+}
+
+// --- parser -----------------------------------------------------------------
+
+/**
+ * Parse a markdown string into:
+ *   info       – frontmatter attributes
+ *   dialogs    – Map<id, { lines: [{speaker, text}], choices: [{label, url}] }>
+ */
+export function parseDialog(markdown) {
+  const { attributes, body } = fm(markdown)
+  const ast = md(body)
+
+  /** @type {Map<string, {lines: Array<{speaker:string,text:string}>, choices: Array<{label:string,url:string}>}>} */
+  const dialogs = new Map()
+
+  let currentId = null
+
+  for (const node of ast) {
+    // A h2 title starts a new dialog section
+    if (node.type === 'title' && node.rank === 2) {
+      currentId = headingId(blockText(node.block))
+      dialogs.set(currentId, { lines: [], choices: [] })
+      continue
     }
-  } else {
-    info = {}
-  }
 
-  return { ast, info }
-})
+    if (currentId === null) continue
+    const section = dialogs.get(currentId)
 
-// get all conversation IDs
-export const getConversations = m(md => {
-  const { ast } = getASTInfo(md)
-  return ast.children.reduce((out, tag, id) => {
-    if (tag.type === 'heading' && tag.depth === 2) {
-      const id = textToId(tag.children.find(tt => tt.type === 'text').value)
-      return [...out, id]
-    }
-    return out
-  }, [])
-})
+    // Blockquote → a line of dialog
+    // Expected structure: > _Speaker_ Rest of text
+    if (node.type === 'quote') {
+      const block = node.block ?? []
+      let speaker = ''
+      let text = ''
 
-// get all sections as AST (mdast) keyed by ID
-export const getAllSections = m(md => {
-  const { ast } = getASTInfo(md)
-  const sections = {}
-  // find section
-  for (let t = 0; t < ast.children.length; t++) {
-    const toptag = ast.children[t]
-    if (toptag.type === 'heading' && toptag.depth === 2) {
-      const id = textToId(toptag.children.find(tt => tt.type === 'text').value)
-      // find tags between h2's
-      for (let h = t + 1; h < ast.children.length; h++) {
-        const tag = ast.children[h]
-        if (tag.type === 'heading' && tag.depth === 2) {
-          break
-        }
-        sections[id] = sections[id] || { id, children: [], ast: toptag }
-        sections[id].children.push(tag)
+      if (block[0]?.type === 'italic') {
+        speaker = blockText(block[0].block)
+        // Everything after the italic node
+        text = block
+          .slice(1)
+          .map((n) => (n.type === 'text' ? n.text : blockText(n.block ?? [])))
+          .join('')
+          .trimStart()
+      } else {
+        text = blockText(block)
       }
-    }
-  }
-  return sections
-})
 
-// get a single section as AST (mdast)
-export const getSection = m((md, id) => {
-  const conversations = getConversations(md)
-
-  if (!conversations.includes(id)) {
-    // fancy error suggests a section-ID
-    const m = new DidYouMean(conversations.join(' '))
-    throw new Error(`Dialog ID "${id}" not found. Did you mean "${m.get(id)}"?`)
-  }
-
-  const sections = getAllSections(md)
-  return sections[id]
-})
-
-// get a single section and turn it into a dialog (code, conversation, options)
-export const getDialog = m((md, id, variables) => {
-  const section = getSection(md, id)
-  const s = section.children.length
-  // recreate the section as markdown, but use mustache, then back to ast
-  if (s) {
-    md = md.toString()
-    const source = md.split('\n').slice(section.ast.position.start.line, section.children[s - 1].position.end.line).join('\n').trim()
-    const parsed = mustache.render(source, variables)
-    const ast = fromMarkdown(parsed)
-
-    const dialog = {
-      code: [],
-      conversation: [],
-      options: []
+      section.lines.push({ speaker, text })
+      continue
     }
 
-    for (const tag of ast.children) {
-      // code goes straight in
-      if (tag.type === 'code') {
-        dialog.code.push({
-          lang: tag.lang,
-          source: tag.value
+    // List item → a menu choice
+    if (node.type === 'list') {
+      const block = node.block ?? []
+      // Each list item's block should be a single link node
+      const link = block.find((n) => n.type === 'link')
+      if (link) {
+        section.choices.push({
+          label: blockText(link.block),
+          url: link.url
         })
       }
-
-      // blockquotes are a line of dialog
-      if (tag.type === 'blockquote') {
-        for (const p of tag.children) {
-          dialog.conversation.push({
-            who: p.children.find(t => t.type === 'emphasis').children[0].value.trim(),
-            text: p.children.find(t => t.type === 'text').value.trim()
-          })
-        }
-      }
-
-      // lists are menu-options
-      if (tag.type === 'list') {
-        dialog.options = tag.children.map(o => {
-          return {
-            dialog: o.children[0].children[0].url,
-            text: o.children[0].children[0].children[0].value
-          }
-        })
-      }
-    }
-    return dialog
-  }
-})
-
-// get the current part of the dialog
-export const runDialog = (md, id, variables, position = 0) => {
-  // support using dialog for 1st param, instead of markdown
-  const dialog = (typeof md === 'string' || md.toString) ? getDialog(md, id, variables) : md
-
-  // run code for this dialog, when it first loads
-  if (position === 0) {
-    const code = (dialog.code || []).filter(c => c.lang === 'js').map(c => c.source).join('\n')
-    if (code) {
-      const f = new Function(...Object.keys(variables), code)
-      f(...Object.values(variables))
+      continue
     }
   }
 
-  const line = dialog.conversation[position]
+  return { info: attributes, dialogs }
+}
 
-  if (typeof line === 'undefined') {
-    return dialog.options
+// --- DialogSystem -----------------------------------------------------------
+
+/**
+ * Engine-agnostic dialog state machine.
+ *
+ * Events / callbacks:
+ *   onLine(line)       – called whenever the current line changes
+ *                        line = { speaker, text } | null
+ *   onChoices(choices) – called when the last line has been shown and choices
+ *                        are available. choices = [{label, url}]
+ *                        If no choices exist the dialog auto-closes (onClose).
+ *   onChoice(choice)   – called when the user picks a menu item.
+ *                        choice = { label, url }
+ *                        url === 'END' means close; '#id' means jump to id.
+ *                        You are expected to call dialog.open(id) or leave it.
+ *   onClose()          – called when the dialog ends (no more lines/choices).
+ *
+ * API:
+ *   dialog.open(id)    – start/restart a named dialog section
+ *   dialog.advance()   – move to next line (call on confirm key-press)
+ *   dialog.choose(i)   – pick menu option by index
+ *   dialog.current     – { speaker, text } of the current line, or null
+ *   dialog.choices     – current choices array (populated after last line)
+ *   dialog.isOpen      – true while a dialog is active
+ */
+export class DialogSystem {
+  constructor(markdown) {
+    const { info, dialogs } = parseDialog(markdown)
+    this.info = info
+    this.dialogs = dialogs
+
+    this._section = null
+    this._lineIndex = -1
+    this.current = null
+    this.choices = []
+    this.isOpen = false
+
+    // Callbacks – override these
+    this.onLine = null
+    this.onChoices = null
+    this.onChoice = null
+    this.onClose = null
   }
 
-  line.ending = 'more'
+  /** Start a dialog section by id */
+  open(id) {
+    const section = this.dialogs.get(id.toLowerCase())
+    if (!section) {
+      console.warn(`[mdif] Unknown dialog id: "${id}"`)
+      return
+    }
+    this._section = section
+    this._lineIndex = -1
+    this.choices = []
+    this.isOpen = true
+    this.advance()
+  }
 
-  if (position === (dialog.conversation.length - 1)) {
-    if (dialog.options.length) {
-      line.ending = 'prompt'
+  /** Advance to the next line. Call this on each user confirmation. */
+  advance() {
+    if (!this._section) return
+
+    const { lines, choices } = this._section
+    this._lineIndex++
+
+    if (this._lineIndex < lines.length) {
+      this.current = lines[this._lineIndex]
+      this.choices = []
+      if (this.onLine) this.onLine(this.current)
     } else {
-      line.ending = 'end'
+      // Past the last line
+      this.current = null
+      if (choices.length > 0) {
+        this.choices = choices
+        if (this.onChoices) this.onChoices(this.choices)
+      } else {
+        this.close()
+      }
     }
   }
 
-  return line
+  /** Pick a menu choice by index */
+  choose(index) {
+    const choice = this.choices[index]
+    if (!choice) return
+
+    this.choices = []
+    if (this.onChoice) {
+      this.onChoice(choice)
+    } else {
+      // Default handling when no callback is provided
+      if (choice.url === 'END') {
+        this.close()
+      } else {
+        const id = choice.url.replace(/^#/, '')
+        this.open(id)
+      }
+    }
+  }
+
+  close() {
+    this.isOpen = false
+    this._section = null
+    this.current = null
+    this.choices = []
+    if (this.onClose) this.onClose()
+  }
+}
+
+/** Convenience: parse + return a ready-to-use DialogSystem */
+export default function createDialog(markdown) {
+  return new DialogSystem(markdown)
 }

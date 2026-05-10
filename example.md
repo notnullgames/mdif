@@ -1,113 +1,29 @@
----
-name: Narnia
-description: A land of rolling hills rising to low mountains in the south. It is predominantly forested except for marshlands in the north. The country is bordered on the east by the Eastern Ocean, on the west by a great mountain range, on the north by the River Shribble, and on the south by Archenland.
----
+## Hello
 
-## Start
+> _konsumer_ This is an example dialog.
 
-{{#konsumer.scared}}
-
-> *konsumer* I'm not talking to you, you're going to sword me!
-
-{{/konsumer.scared}}
-
-{{^konsumer.scared}}
-
-{{#konsumer.gaveSword}}
-
-> *konsumer* How do you like the sword?
-
-- [it's ok](#sword_ok)
-- [it sucks](#sword_sucks)
-
-{{/konsumer.gaveSword}}
-{{^konsumer.gaveSword}}
-
-> *konsumer* Hi, yer name is {{player.name}}, right?
-
-- [hmm?](#start)
-- [yes](#thats_my_name)
-- [no](#lie_about_name)
-- [wait, how do you know my name?](#lie_about_name)
-{{/konsumer.gaveSword}}
-{{/konsumer.scared}}
-
-## Sword OK
-
-> *konsumer* I am glad you like it. Whelp, see ya!
+- [Huh?](#hello)
+- [Ask Simon](#simon-says)
+- [Got it.](END)
 
 
-## Sword Sucks
+## Simon Says
 
-> *konsumer* Sorry to hear that. Whelp, see ya!
+> _Simon_ Hey, what's up?
 
+> _Simon_ Did you have a question?
 
-## That's My Name
-
-> *konsumer* My name is konsumer. I think we'll be great friends.
-
-> *{{player.name}}* Yeah?
-
-> *konsumer* Say, I've got a proposition for you.
-
-> *{{player.name}}* Yeh?
-
-> *konsumer* Yep. So, here's the deal: I will give you this sword, but you have to promise to not hit me with it.
-
-> *konsumer* Sound good?
-
-- [what?](#thats_my_name)
-- [ok, deal.](#take_sword)
-- [no promises.](#no_promises)
-- [lemme think about it](#goodbye)
+- [I am confused](#simon-confused)
+- [Nevermind](#hello)
 
 
-## No Promises
+## Simon Confused
 
-> *konsumer* Well, that's freaky.
+> _Simon_ This is a system where you can create NPC dialog and actions, using markdown. It allows you to think of your dialog as an interactive fiction, and you can write it in a familiar language.
 
-> *konsumer* Ok, are you sure?
+> _konsumer_ I use it to build up games.
 
+> _Simon_ Hopefully it's pretty simple.
 
-- [I was just joking.](#take_sword)
-- [I'm serious.](#scare_konsumer)
-
-
-## Scare Konsumer
-
-> *konsumer* Ok, color me scared. I will avoid you in the future.
-
-```js
-konsumer.scared = true
-```
-
-[Good.](END)
-
-
-## Lie About Name
-
-> *konsumer* Tom said that was your name.
-
-> *konsumer* Did he lie?
-
-- [what?](#lie_about_name)
-- [yes](#goodbye)
-- [no](#thats_my_name)
-
-
-## Take sword
-
-> *konsumer* Ok, here ya go. Now remember: Don't hit me with it.
-
-```js
-player.inventory ||= []
-player.inventory.push('konsumer_sword')
-konsumer.gaveSword = true
-```
-
-
-## Goodbye
-
-> *konsumer* ok, see ya!
-
-- [byeeee!](END)
+- [Ok, makes sense](#hello)
+- [What?](#simon_confused)

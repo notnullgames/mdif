@@ -1,115 +1,67 @@
-// this is a simple demo of a CLI interactive fiction, using example.md
-// You can edit example.md to make a new game!
+#!/usr/bin/env node
 
-import { promises as fs } from 'node:fs'
-import chalk from 'chalk'
-import { runDialog, getASTInfo} from '../index.js' // 'mdif'
+import { readFile } from 'node:fs/promises'
+import * as readline from 'node:readline/promises'
+import { stdin as input, stdout as output } from 'node:process'
+import createDialog from '../index.js'
 
-// function sleep for ms
-const sleep = time => new Promise(resolve=> setTimeout(resolve, time))
+const source = await readFile(new URL('../example.md', import.meta.url), 'utf8')
+const dialog = createDialog(source)
 
-// read a markdown file as a string
-const md = (await fs.readFile('example.md')).toString()
-const { info } = getASTInfo(md)
-
-process.stdin.setRawMode( true )
-process.stdin.resume()
-process.stdin.setEncoding('utf8')
-
-// put last input into currentKey, exit on Q
-let currentKey
-process.stdin.on('data', key => {
-  if (key === 'q') {
-    process.exit(0)
-  }
-  if (key === 'd') {
-    describe()
-  }
-  currentKey = key
-})
-
-// setup some intiial state
-const state = {
-  player: { name: 'Simon', inventory: [] },
-  konsumer: { scared: false, gaveSword: false }
+function formatLine({ speaker, text }) {
+  return speaker ? `\x1b[1m${speaker}:\x1b[0m ${text}` : text
 }
 
-// each person has a color
-const peopleColors = {}
-peopleColors[state.player.name] = chalk.green
-peopleColors.konsumer = chalk.yellow
+// In non-TTY mode, buffer all stdin lines upfront
+let lineBuffer = []
+let rl
 
-// tell the player how to play
-process.stdout.write(`
-${chalk.bold('Press space to advance through a conversation, or a number to choose something. Press Q to quit. Press D to describe the palce you are in.')}
-Let's begin.
-
-${chalk.bold(chalk.underline(info.name))}
-${info.description}
-`)
-
-let currentDialog = 'start'
-let screen = runDialog (md, currentDialog, state)
-// track the current position in dialog
-let dialogPosition = 1
-let lastPrompt = 'start'
-
-// say a sinlge line of dialog, wait for space
-async function say(line) {
-  if (line.who) {
-    process.stdout.write('\n' + chalk.bold(peopleColors[line.who](line.who)) + ': ')
+if (process.stdin.isTTY) {
+  rl = readline.createInterface({ input, output })
+} else {
+  const lines = []
+  for await (const line of readline.createInterface({ input })) {
+    lines.push(line)
   }
-  process.stdout.write(line.text + '\n')
-
-  if (line.ending === 'prompt' || line.ending === 'end') {
-    return
-  }
-
-  process.stdout.write('\x1b[999G\x1b[2D->')
-
-  // wait for a space
-  while(currentKey !== ' '){
-    await sleep(100)
-  } 
+  lineBuffer = lines
 }
 
-// show options, wait for menu input
-async function menu(options) {
-  if (!options.length) {
-    return { dialog: 'END' }
+async function ask(prompt = '') {
+  if (!process.stdin.isTTY) {
+    return lineBuffer.shift() ?? null
   }
-  let menu = '\n'
-  for (const i in options) {
-    menu += `  ${1 + parseInt(i)}.) ${options[i].text}\n`
+  try {
+    return await rl.question(prompt)
+  } catch {
+    return null
   }
-  process.stdout.write(menu + '\n? ')
-  // wait for a valid option
-  while(isNaN(currentKey) || currentKey < 1 || currentKey > options.length){
-    await sleep(100)
-  }
-  const choice = options[currentKey-1]
-  process.stdout.write(choice.text + '\n')
-  return choice
 }
 
-async function runScreen() {
-  if (Array.isArray(screen)) {
-    currentKey = ''
-    const choice = await menu(screen)
-    if (choice.dialog === 'END') {
-      return false
+dialog.open('hello')
+
+while (dialog.isOpen) {
+  if (dialog.current) {
+    console.log(formatLine(dialog.current))
+    dialog.advance()
+  } else if (dialog.choices.length > 0) {
+    console.log()
+    dialog.choices.forEach((c, i) => console.log(`  \x1b[33m${i + 1}.\x1b[0m ${c.label}`))
+    console.log()
+
+    let idx = -1
+    while (idx < 0 || idx >= dialog.choices.length) {
+      const answer = await ask('Choice> ')
+      if (answer === null) { dialog.close(); break }
+      idx = parseInt(answer, 10) - 1
+      if (idx < 0 || idx >= dialog.choices.length) {
+        console.log(`Enter 1–${dialog.choices.length}`)
+      }
     }
-    currentDialog = choice.dialog.replace(/^#/, '')
-    dialogPosition = 0
+    if (dialog.isOpen) dialog.choose(idx)
   } else {
-    currentKey = ''
-    await say(screen)
-    dialogPosition++
+    break
   }
-  screen = runDialog (md, currentDialog, state, dialogPosition)
-  return true
 }
 
-while(await runScreen()) {}
-console.log('\nThanks for playing.\n')
-process.exit()
+console.log('\n[end]')
+if (rl) rl.close()

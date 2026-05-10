@@ -1,144 +1,160 @@
+#!/usr/bin/env node
+
+import { readFileSync } from 'node:fs'
+import { fileURLToPath } from 'node:url'
+import { dirname, join } from 'node:path'
 import r from 'raylib'
-import { promises as fs } from 'node:fs'
-import { runDialog } from '../index.js' // 'mdif'
+import createDialog from '../index.js'
 
-// TODO: mixed hardcode & derived sizes. Pick one.
+const __dirname = dirname(fileURLToPath(import.meta.url))
+const ASSETS = join(__dirname, 'images')
 
-const md = (await fs.readFile('example.md')).toString()
+const SCREEN_W = 480
+const SCREEN_H = 270
+const FONT_SIZE = 12
+const LINE_H = 16
+const PAD = 10
+const PORTRAIT_H = 64  // portraits scaled to this height
 
-function drawDialog (text, config = {}) {
-  const {
-    speed = 2,
-    fontSize = 12,
-    color = r.WHITE,
-    more,
-    texture,
-    patch,
-    position,
-    who,
-    whoImage
-  } = config
-
-  r.DrawTextureNPatch(
-    texture,
-    patch,
-    position,
-    { x: 0, y: 0 },
-    0,
-    color
-  )
-
-  // TODO: implement something like
-  // https://github.com/raysan5/raylib/blob/master/examples/text/text_rectangle_bounds.c
-  // instead of this hacky wordwrap
-  r.DrawText(wrap(text, 30), position.x + 10, position.y + 15, fontSize, color)
-
-  if (who) {
-    r.DrawText(who, position.x + 10 - 2, position.y - 35 - 2, fontSize, r.BLACK)
-    r.DrawText(who, position.x + 10, position.y - 35, fontSize, color)
-  }
-
-  if (whoImage) {
-    r.DrawTexture(whoImage, position.x + position.width - whoImage.width - 10, position.y - whoImage.height, r.WHITE)
-  }
-
-  if (more && Math.floor(r.GetTime() * speed) % 2 === 0) {
-    r.DrawRectangle(position.x + position.width - 15, position.y + position.height - 15, 5, 5, color)
-  }
+const NPATCH = {
+  source: { x: 0, y: 192, width: 64, height: 64 },
+  left: 6, top: 6, right: 6, bottom: 6,
+  layout: r.NPATCH_NINE_PATCH
 }
 
-function drawOptions(options, config = {}) {
-  const {
-    currentOption = 0,
-    position,
-    fontSize = 12,
-    color = r.WHITE,
-  } = config
-
-  for (const o in options) {
-    const { text } = options[o]
-    r.DrawText(wrap(text, 30), position.x + 40, position.y + ((fontSize + 3) * 2) + (o * (fontSize + 4)), fontSize, color)
-  }
-
-  r.DrawRectangle(position.x + 10, position.y + ((fontSize + 4) * currentOption) + 80, 15, 15, color)
-}
-
-const wrap = (s, w) => s.replace(
-  new RegExp(`(?![^\\n]{1,${w}}$)([^\\n]{1,${w}})\\s`, 'g'), '$1\n'
-)
-
-const screenWidth = 640
-const screenHeight = 480
-
-r.InitWindow(screenWidth, screenHeight, 'raylib - dialog')
-
+r.InitWindow(SCREEN_W, SCREEN_H, 'mdif dialog demo')
 r.SetTargetFPS(60)
 
-const texture = r.LoadTexture('examples/images/ninepatch.png')
-const patch = { source: { x: 0, y: 192, height: 64, width: 64 }, left: 6, top: 6, right: 6, bottom: 6, layout: r.NPATCH_NINE_PATCH }
-const position = { x: 10, y: screenHeight / 2, width: screenWidth - 20, height: (screenHeight / 2) - 20 }
-const fontSize = 32
-const who = 'konsumer'
+const panelTex = r.LoadTexture(join(ASSETS, 'ninepatch.png'))
 
-const people = {
-  konsumer: r.LoadTexture('examples/images/konsumer.png'),
-  Simon: r.LoadTexture('examples/images/Simon.png')
-}
+// Load portrait per speaker name (case-sensitive filename match)
+const portraitFiles = { konsumer: 'konsumer.png', Simon: 'Simon.png' }
+const portraits = Object.fromEntries(
+  Object.entries(portraitFiles).map(([name, file]) => [name, r.LoadTexture(join(ASSETS, file))])
+)
 
-const state = {
-  player: { name: 'Simon', inventory: [] },
-  konsumer: { scared: false }
-}
+const source = readFileSync(join(__dirname, '../example.md'), 'utf8')
+const dialog = createDialog(source)
 
-let currentDialog = 'start'
-let screen = runDialog (md, currentDialog, state)
-// track the current position in dialog
-let dialogPosition = 0
-let currentOption = 0
-
-while (!r.WindowShouldClose()) {
-  r.BeginDrawing()
-  r.ClearBackground(r.LIGHTGRAY)
-  if (Array.isArray(screen)) {
-    if (!screen.length) {
-      break
-    }
-    drawOptions(screen, { position, currentOption, fontSize })
-  } else {
-    drawDialog(screen.text, { texture, patch, position, fontSize, who: screen.who, whoImage: people[screen.who], more: screen.ending !== 'prompt' })
-    if (screen.ending === 'prompt') {
-      const options = runDialog (md, currentDialog, state, dialogPosition + 1)
-      if (r.IsKeyPressed(r.KEY_UP)) {
-        currentOption -= 1
-      }
-      if (r.IsKeyPressed(r.KEY_DOWN)) {
-        currentOption += 1
-      }
-      if (r.IsKeyPressed(r.KEY_SPACE)) {
-        currentDialog = options[currentOption].dialog.replace(/^#/, '')
-        if (currentDialog === 'END') {
-          break
-        }
-        currentOption = 0
-        dialogPosition = 0
-        screen = runDialog (md, currentDialog, state)
-      }
-      if (currentOption < 0) {
-        currentOption = options.length - 1
-      }
-      if (currentOption >= options.length) {
-        currentOption = 0
-      }
-      drawOptions(options, { position, currentOption, fontSize })
+function wrapText(text, maxWidth) {
+  const words = text.split(' ')
+  const lines = []
+  let current = ''
+  for (const word of words) {
+    const candidate = current ? current + ' ' + word : word
+    if (r.MeasureText(candidate, FONT_SIZE) <= maxWidth) {
+      current = candidate
     } else {
-      if (r.IsKeyPressed(r.KEY_SPACE)) {
-        dialogPosition += 1
+      if (current) lines.push(current)
+      current = word
+    }
+  }
+  if (current) lines.push(current)
+  return lines
+}
+
+function drawDialog(menuIndex) {
+  if (!dialog.isOpen) return
+
+  const inChoiceMode = dialog.choices.length > 0
+  const speaker = !inChoiceMode && dialog.current?.speaker ? dialog.current.speaker : null
+  const portrait = speaker ? portraits[speaker] : null
+  const portraitScale = portrait ? PORTRAIT_H / portrait.height : 1
+  const portraitDrawW = portrait ? Math.round(portrait.width * portraitScale) : 0
+  const portraitW = portrait ? portraitDrawW + PAD : 0
+  const innerW = SCREEN_W - PAD * 4 - portraitW
+
+  const contentLines = []
+
+  if (inChoiceMode) {
+    const prefix = '> '
+    const indent = '  '
+    const prefixW = r.MeasureText(prefix, FONT_SIZE)
+    for (let i = 0; i < dialog.choices.length; i++) {
+      const selected = i === menuIndex
+      const color = selected ? r.YELLOW : r.WHITE
+      for (const [j, line] of wrapText(dialog.choices[i].label, innerW - prefixW).entries()) {
+        contentLines.push({ text: (j === 0 ? (selected ? prefix : indent) : indent) + line, color })
       }
-      screen = runDialog (md, currentDialog, state, dialogPosition)
+    }
+  } else if (dialog.current) {
+    for (const line of wrapText(dialog.current.text, innerW)) {
+      contentLines.push({ text: line, color: r.WHITE })
     }
   }
 
+  const hasHint = !inChoiceMode && dialog.current
+  const textH = contentLines.length * LINE_H
+  const contentH = Math.max(textH, portrait ? PORTRAIT_H : 0)
+  const speakerH = speaker ? LINE_H : 0
+  const boxH = contentH + PAD * 2 + (hasHint ? LINE_H : 0)
+  const boxX = PAD
+  const boxY = SCREEN_H - boxH - PAD - speakerH
+  const boxW = SCREEN_W - PAD * 2
+
+  if (speaker) {
+    r.DrawText(speaker, boxX + PAD, boxY, FONT_SIZE, r.YELLOW)
+  }
+
+  r.DrawTextureNPatch(panelTex, NPATCH, { x: boxX, y: boxY + speakerH, width: boxW, height: boxH }, { x: 0, y: 0 }, 0, r.WHITE)
+
+  if (portrait) {
+    const portraitY = boxY + speakerH + PAD + Math.round((contentH - PORTRAIT_H) / 2)
+    r.DrawTexturePro(
+      portrait,
+      { x: 0, y: 0, width: portrait.width, height: portrait.height },
+      { x: boxX + PAD, y: portraitY, width: portraitDrawW, height: PORTRAIT_H },
+      { x: 0, y: 0 }, 0, r.WHITE
+    )
+  }
+
+  // vertically center text within contentH
+  const textOffsetY = Math.round((contentH - textH) / 2)
+  for (let i = 0; i < contentLines.length; i++) {
+    const { text, color } = contentLines[i]
+    r.DrawText(text, boxX + PAD + portraitW, boxY + speakerH + PAD + textOffsetY + i * LINE_H, FONT_SIZE, color)
+  }
+
+  if (hasHint) {
+    const hint = '[Z] next'
+    const hintW = r.MeasureText(hint, FONT_SIZE)
+    r.DrawText(hint, boxX + boxW - PAD - hintW, boxY + speakerH + boxH - PAD - FONT_SIZE, FONT_SIZE, r.GRAY)
+  }
+}
+
+let menuIndex = 0
+dialog.open('hello')
+
+while (!r.WindowShouldClose()) {
+  if (dialog.isOpen) {
+    if (dialog.choices.length > 0) {
+      if (r.IsKeyPressed(r.KEY_UP))    menuIndex = (menuIndex - 1 + dialog.choices.length) % dialog.choices.length
+      if (r.IsKeyPressed(r.KEY_DOWN))  menuIndex = (menuIndex + 1) % dialog.choices.length
+      if (r.IsKeyPressed(r.KEY_Z) || r.IsKeyPressed(r.KEY_ENTER)) {
+        dialog.choose(menuIndex)
+        menuIndex = 0
+      }
+    } else if (dialog.current) {
+      if (r.IsKeyPressed(r.KEY_Z) || r.IsKeyPressed(r.KEY_ENTER)) dialog.advance()
+    }
+  } else {
+    // restart on any key after dialog ends
+    if (r.IsKeyPressed(r.KEY_Z) || r.IsKeyPressed(r.KEY_ENTER)) {
+      menuIndex = 0
+      dialog.open('hello')
+    }
+  }
+
+  r.BeginDrawing()
+  r.ClearBackground(r.BLACK)
+  drawDialog(menuIndex)
+  if (!dialog.isOpen) {
+    const msg = '[Z] restart'
+    r.DrawText(msg, (SCREEN_W - r.MeasureText(msg, FONT_SIZE)) / 2, SCREEN_H / 2, FONT_SIZE, r.GRAY)
+  }
   r.EndDrawing()
 }
 
+r.UnloadTexture(panelTex)
+for (const tex of Object.values(portraits)) r.UnloadTexture(tex)
 r.CloseWindow()
